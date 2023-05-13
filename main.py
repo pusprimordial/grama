@@ -1,43 +1,53 @@
-# Example file showing a circle moving on screen
 import pygame
+from pygame.locals import *
+import sys
 
-# pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-clock = pygame.time.Clock()
-running = True
-dt = 0
 
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+DISPLAYSURF = pygame.display.set_mode((1000, 800))
+pygame.display.set_caption('Map_rendering Demo')
+FPSCLOCK = pygame.time.Clock()
 
-while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
+map_data = [
+[1, 1, 1, 1, 1],
+[1, 0, 0, 0, 1],
+[1, 0, 0, 0, 1],
+[1, 1, 1, 1, 1],
+[1, 0, 0, 0, 1],
+[1, 1, 1, 1, 1]
+]
+
+wall = pygame.image.load('wall.png').convert_alpha()
+grass = pygame.image.load('grass.png').convert_alpha()
+
+TILEWIDTH = 64
+TILEHEIGHT = 64
+TILEHEIGHT_HALF = TILEHEIGHT /2
+TILEWIDTH_HALF = TILEWIDTH /2
+
+for row_nb, row in enumerate(map_data):
+    for col_nb, tile in enumerate(row):
+        if tile == 1:
+            tileImage = wall
+        else:
+            tileImage = grass
+        cart_x = row_nb * TILEWIDTH_HALF
+        cart_y = col_nb * TILEHEIGHT_HALF
+        iso_x = (cart_x - cart_y)
+        iso_y = (cart_x + cart_y)/2
+        centered_x = DISPLAYSURF.get_rect().centerx + iso_x
+        centered_y = DISPLAYSURF.get_rect().centery/2 + iso_y
+        DISPLAYSURF.blit(tileImage, (centered_x, centered_y))
+
+while True:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
-    
-    pygame.draw.circle(screen, "red", player_pos, 40)
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        player_pos.y -= 300 * dt
-    if keys[pygame.K_s]:
-        player_pos.y += 300 * dt
-    if keys[pygame.K_a]:
-        player_pos.x -= 300 * dt
-    if keys[pygame.K_d]:
-        player_pos.x += 300 * dt
-
-    # flip() the display to put your work on screen
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == KEYUP:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+ 
     pygame.display.flip()
-
-    # limits FPS to 60
-    # dt is delta time in seconds since last frame, used for framerate-
-    # independent physics.
-    dt = clock.tick(60) / 1000
-
-pygame.quit()
+    FPSCLOCK.tick(30)
